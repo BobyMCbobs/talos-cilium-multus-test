@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: samplepod
+  namespace: default
+  annotations:
+    k8s.v1.cni.cncf.io/networks: kube-system/br0
+spec:
+  containers:
+  - name: k
+    command: ["/bin/sh", "-c", "trap : TERM INT; sleep infinity & wait"]
+    image: alpine:3.20

@@ -1,0 +1,58 @@
+#+title: Talos+Cilium+Multus
+
+#+begin_quote
+An exploration for running KubeVirt
+#+end_quote
+
+* Status
+
+**WIP**: IP addresses are allocated through Multus but networking does not appear functional due to incorrect IP addressing
+
+* Prerequisites
+
+#+begin_src shell
+brew install age siderolabs/tap/talosctl talhelper yq
+#+end_src
+
+* Setup
+
+1. Create a Talos VM
+
+2. Write your SOPs config, edit .sops.yaml (see: https://budimanjojo.github.io/talhelper/latest/guides/#configuring-sops-for-talhelper)
+
+3. Generate Talos config
+
+   #+begin_src shell
+   talhelper gensecret
+   talhelper genconfig
+   #+end_src
+
+4. Apply the config
+
+   #+begin_src shell
+   talosctl apply-config --talosconfig=./clusterconfig/talosconfig --nodes=IP_ADDRESS --file=./clusterconfig/talos-cm.yaml
+   #+end_src
+
+5. Bootstrap
+
+   #+begin_src shell
+   talosctl bootstrap --talosconfig=./clusterconfig/talosconfig --nodes=IP_ADDRESS
+   #+end_src
+
+6. Get Kubeconfig
+
+   #+begin_src shell
+   talosctl kubeconfig --talosconfig=./clusterconfig/talosconfig --nodes=IP_ADDRESS ./clusterconfig/kubeconfig
+   #+end_src
+
+7. Set the cluster up
+
+   get the Cilium CNI installed
+   #+begin_src shell
+   ./install-cilium.sh
+   #+end_src
+
+   install Multus, KubeVirt
+   #+begin_src shell
+   ./install-cluster-components.sh
+   #+end_src

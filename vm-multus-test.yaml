@@ -1,0 +1,57 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: talos
+  labels:
+    vm: talos
+spec:
+ runStrategy: Always
+ template:
+   metadata:
+     labels:
+       kubevirt.io/vm: fedora
+   spec:
+     terminationGracePeriodSeconds: 0
+     domain:
+       devices:
+         networkInterfaceMultiqueue: true
+         autoattachSerialConsole: true
+         autoattachGraphicsDevice: true
+         autoattachPodInterface: false
+         disks:
+         - disk:
+             bus: virtio
+           name: talos
+         interfaces:
+         - bridge: {}
+           name: default
+         rng: {}
+       resources:
+         requests:
+           memory: 250Mi
+           devices.kubevirt.io/kvm: "1"
+     networks:
+     - name: default
+       multus:
+         networkName: kube-system/br0
+     volumes:
+       - name: talos
+         containerDisk:
+           image: ghcr.io/bobymcbobs/talos:ab1024449cff00f2e27caee13298635e8fd178c6079d4de34a9370a55a54b938-v1.8.1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: talos
+spec:
+  ports:
+  - port: 6443
+    targetPort: 6443
+    name: apiserver
+  - port: 50000
+    targetPort: 50000
+    name: talos
+  selector:
+    vm.kubevirt.io/name: talos
+  type: ClusterIP
